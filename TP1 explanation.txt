@@ -1,0 +1,27 @@
+Java Parser Version 0.1:  Reading from file TestFile.java . . .
+TestFile.java
+-CompilationUnit
+--TypeDeclaration
+---ClassOrInterfaceDeclaration
+----ClassDeclaration
+-----NormalClassDeclaration
+------Identifier : get the name of the class
+------ClassBody
+-------ClassBodyDeclaration
+--------MemberDecl
+---------ConstructorDecl
+----------Identifier : get the name of the method
+----------ConstructorDeclaratorRest
+-----------MethodBody
+------------Block
+-------------BlockStatements
+--------------BlockStatement
+---------------Statement : statement can contain statement, so must visit all the child of it to find local variables
+
+
+----------------IfStatement : count if statments
+----------------WhileStatement : count while statements
+----------------BreakStatement : count break statements
+----------------LocalVariableDeclarationStatement : count local variables
+
+用排除法比较好。。。起码不会漏
