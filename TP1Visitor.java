@@ -8,11 +8,16 @@
 
 public class TP1Visitor implements JavaParser1_7Visitor {
 
+//Store the numbers in field, Don't consider the nested class
     protected int numberOfId = 1;
     protected int numberOfIf;
     protected int numberOfWhile;
     protected int numberOfBreak;
     protected int numberOfVarLocal;
+
+//Becasue it has some nested situation, like the MethodOrFieldDecl and GenericMethodOrConstructorRest both use MethodDeclaratorRest, so I need a flag to show if the count is processing or not
+    protected Boolean counting = false;
+
 
     public Object visit(CompilationUnit node, Object data){
         
@@ -25,12 +30,12 @@ public class TP1Visitor implements JavaParser1_7Visitor {
 
     public Object visit(NormalClassDeclaration node, Object data){
 
-        String className = "aClass";
+        String className = "ClassNoName";
         int i;
         for (i = 0; i < node.jjtGetNumChildren(); i++){
-            Node childNode = node.jjtGetChild(i);
+            SimpleNode childNode = (SimpleNode)node.jjtGetChild(i);
             if (childNode.toString() == "Identifier"){
-                className = "aClass"; // need to change to the real class name
+                className = childNode.jjtGetFirstToken().toString(); 
                 break;
             }
         }
@@ -40,29 +45,17 @@ public class TP1Visitor implements JavaParser1_7Visitor {
         return data;  
     }
 
-    public Object visit(ConstructorDecl node, Object data){
-        
-        String methodName = "aMethod";
-        int i;
-        for (i = 0; i < node.jjtGetNumChildren(); i++){
-            Node childNode = node.jjtGetChild(i);
-            if (childNode.toString() == "Identifier"){
-                methodName = "aMethod"; // need to change to the real method name
-                break;
-            }
-        }
 
-        node.childrenAccept(this, data);
+// This Section is to handle the methods, There are four type of method need to be handle
+// void (return) method, constructor method, generic method and the normal method
 
-        String stringToPrint = 
-            data.toString() + ", " + 
-            methodName + ", #if:" +
-            this.numberOfIf + ", #while:" +
-            this.numberOfWhile + ", #break:" +
-            this.numberOfBreak + ", #varLocal:" +
-            this.numberOfVarLocal;
+    protected String statisticsString(){
 
-        System.out.println(stringToPrint);
+        String statisticsString = 
+            "#if:" + this.numberOfIf + 
+            ", #while:" + this.numberOfWhile + 
+            ", #break:" + this.numberOfBreak + 
+            ", #varLocal:" + this.numberOfVarLocal;
 
         // return to 0
         this.numberOfIf = 0;
@@ -70,8 +63,79 @@ public class TP1Visitor implements JavaParser1_7Visitor {
         this.numberOfBreak = 0;
         this.numberOfVarLocal = 0;
 
+        return statisticsString;
+
+    }
+
+    protected String positionString(SimpleNode node, Object data){
+
+        String methodName = "MethodNoName";
+        int i;
+        for (i = 0; i < node.jjtGetNumChildren(); i++){
+            SimpleNode childNode = (SimpleNode)node.jjtGetChild(i);
+            if (childNode.toString() == "Identifier"){
+                methodName = childNode.jjtGetFirstToken().toString(); 
+                break;
+            }
+        }
+
+        String positionString = data.toString() + ", " + methodName + ", ";
+
+        return positionString;
+    }
+
+    protected void printStatistics(SimpleNode node, Object data){
+        System.out.println(this.positionString(node, data) + this.statisticsString());
+    }
+
+    public Object visit(GenericMethodOrConstructorRest node, Object data){
+
+        this.counting = true; //used for stop the MethoDeclaratorRest to count
+
+        node.childrenAccept(this, data);
+
+        this.printStatistics(node, data);
+
+        this.counting = false;
+
+        return data; 
+    }
+
+    public Object visit(ConstructorDecl node, Object data){
+        
+        node.childrenAccept(this, data);
+
+        this.printStatistics(node, data);
+        
         return data;  
     }
+
+    public Object visit(VoidMethodDecl node, Object data){
+ 
+        node.childrenAccept(this, data);
+    
+        this.printStatistics(node, data);
+
+        return data;  
+    }
+
+    public Object visit(MethodDeclaratorRest node, Object data){
+ 
+        node.childrenAccept(this, data);
+        
+        if (!this.counting){
+
+            SimpleNode nodeWithName = 
+                (SimpleNode)node.jjtGetParent() // MethodOrFieldRest
+                                .jjtGetParent(); // MethodOrFieldDecl
+
+            this.printStatistics(nodeWithName, data);
+
+        }
+        return data;  
+    }
+
+//This section is used to count the number of targeted statements
 
     public Object visit(IfStatement node, Object data){
  
@@ -433,13 +497,6 @@ public class TP1Visitor implements JavaParser1_7Visitor {
         return data;  
     }
 
-    public Object visit(VoidMethodDecl node, Object data){
- 
-        node.childrenAccept(this, data);
- 
-        return data;  
-    }
-
     public Object visit(MethodOrFieldDecl node, Object data){
  
         node.childrenAccept(this, data);
@@ -455,13 +512,6 @@ public class TP1Visitor implements JavaParser1_7Visitor {
     }
 
     public Object visit(FieldDeclaratorsRest node, Object data){
- 
-        node.childrenAccept(this, data);
- 
-        return data;  
-    }
-
-    public Object visit(MethodDeclaratorRest node, Object data){
  
         node.childrenAccept(this, data);
  
@@ -497,13 +547,6 @@ public class TP1Visitor implements JavaParser1_7Visitor {
     }
 
     public Object visit(GenericMethodOrConstructorDecl node, Object data){
- 
-        node.childrenAccept(this, data);
- 
-        return data;  
-    }
-
-    public Object visit(GenericMethodOrConstructorRest node, Object data){
  
         node.childrenAccept(this, data);
  

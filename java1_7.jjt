@@ -89,7 +89,7 @@ public class JavaParser1_7 {
                System.out.println("Parsing: " + s);
 
               JavaParser1_7 parser = new JavaParser1_7(s);
-              //Yan 2015-01-15
+              // Yan 2015-01-15
               // To accept a visitor, add the .jjtAccept(new Visitor, s) 
               parser.CompilationUnit(); 
 
