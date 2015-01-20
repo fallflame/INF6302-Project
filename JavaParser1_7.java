@@ -21,7 +21,7 @@ public class JavaParser1_7/*@bgen(jjtree)*/implements JavaParser1_7TreeConstants
                System.out.println("Parsing: " + s);
 
               JavaParser1_7 parser = new JavaParser1_7(s);
-              parser.CompilationUnit(); 
+              parser.CompilationUnit().jjtAccept(new TP1Visitor(), s); 
 
                   }
             catch(ParseException e) { e.printStackTrace(); }

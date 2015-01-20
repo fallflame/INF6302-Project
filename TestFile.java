@@ -11,6 +11,12 @@ public class TestFile {
 		while(0!=1){
 			break;
 		};
+
+		class nestedClass {
+			public nestedMethod(){
+				int c;
+			}
+		}
 	}
 
 	public void voidMethod (){

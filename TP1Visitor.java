@@ -4,108 +4,206 @@
  * This visitor give:
  * id, fileName, className, methodName, #if, #while, #break, #varLocal
  */
-
+import java.util.Stack;
 
 public class TP1Visitor implements JavaParser1_7Visitor {
 
 //Store the numbers in field, Don't consider the nested class
-    protected int numberOfId = 1;
+/*    protected int numberOfId = 1;
     protected int numberOfIf;
     protected int numberOfWhile;
     protected int numberOfBreak;
     protected int numberOfVarLocal;
+*/      
+    static int id; // count the line number of the output
 
+
+// A new class used only in this class, it used for count the info needed and print them.
+    class Counter{
+
+        String fileName;
+        String className;
+        String methodName;
+
+        int numberOfIf;
+        int numberOfWhile;
+        int numberOfBreak;
+        int numberOfVarLocal;
+
+        void increaseNumberOfIfByOne(){
+            this.numberOfIf += 1;
+        }
+
+        void increaseNumberOfWhileByOne(){
+            this.numberOfWhile += 1;
+        }
+
+        void increaseNumberOfBreakByOne(){
+            this.numberOfBreak += 1;
+        }
+
+        void increaseNumberOfVarLocalByOne(){
+            this.numberOfVarLocal += 1;
+        }
+
+        void addCounter(Counter c){
+            this.numberOfIf += c.numberOfIf;
+            this.numberOfWhile += c.numberOfWhile;
+            this.numberOfBreak += c.numberOfBreak;
+            this.numberOfVarLocal += c.numberOfVarLocal;
+        }
+
+        void print() {
+            System.out.println(
+                TP1Visitor.id + ";" +
+                this.fileName + ";" +
+                this.className + ";" +
+                this.methodName + ";" +
+                this.numberOfIf + ";" +
+                this.numberOfWhile + ";" +
+                this.numberOfBreak + ";" +
+                this.numberOfVarLocal
+            );
+            TP1Visitor.id += 1;
+        }
+
+    }
 //Becasue it has some nested situation, like the MethodOrFieldDecl and GenericMethodOrConstructorRest both use MethodDeclaratorRest, so I need a flag to show if the count is processing or not
-    protected Boolean counting = false;
+//    protected Boolean counting = false;
 
 
     public Object visit(CompilationUnit node, Object data){
         
         String fileName = data.toString();
+
+        //create a new Stack to save counters
+        Stack<Counter> countersStack = new Stack<Counter>();
+
+        //create a new counter and push it
+        Counter fileCounter = new Counter();
+        fileCounter.fileName = fileName;
+
+        countersStack.push(fileCounter);
  
-        node.childrenAccept(this, fileName);
+        node.childrenAccept(this, countersStack);
+
+        // with a push, must be a pop
+        Counter counter = countersStack.pop();
 
         return data;  
     }
 
     public Object visit(NormalClassDeclaration node, Object data){
 
-        String className = "ClassNoName";
-        int i;
-        for (i = 0; i < node.jjtGetNumChildren(); i++){
-            SimpleNode childNode = (SimpleNode)node.jjtGetChild(i);
-            if (childNode.toString() == "Identifier"){
-                className = childNode.jjtGetFirstToken().toString(); 
-                break;
-            }
-        }
+        Stack<Counter> countersStack = (Stack<Counter>) data;
+
+        String className = ((SimpleNode)(node.jjtGetChild(0))).jjtGetFirstToken().toString();
+
+        Counter classCounter = new Counter();
+        classCounter.fileName = countersStack.peek().fileName;
+        classCounter.className = className;
+
+        countersStack.push(classCounter);
  
-        node.childrenAccept(this, data.toString() + ", " + className);
+        node.childrenAccept(this, countersStack);
+ 
+        Counter counter = countersStack.pop();
+        countersStack.peek().addCounter(counter);
+
+        return data;  
+    }
+
+
+    public Object visit(MethodBody node, Object data){
+
+        Stack<Counter> countersStack = (Stack<Counter>)data;
+ 
+        String methodName = "noName";
+        SimpleNode currentNode = node;
+
+        while(methodName == "noName"){
+            
+            currentNode = (SimpleNode)currentNode.jjtGetParent();
+
+            int i;
+            for (i = 0; i < currentNode.jjtGetNumChildren(); i++){
+                SimpleNode childNode = (SimpleNode)currentNode.jjtGetChild(i);
+                if (childNode.toString() == "Identifier"){
+                    // get the method name
+                    methodName = childNode.jjtGetFirstToken().toString(); 
+                    break;
+                }
+            }
+
+        }
+
+        Counter methodCounter = new Counter();
+        methodCounter.fileName = countersStack.peek().fileName;
+        methodCounter.className = countersStack.peek().className;
+        methodCounter.methodName = methodName;
+
+        countersStack.push(methodCounter);
+
+        node.childrenAccept(this, countersStack);    
+
+        Counter counter = countersStack.pop();
+        counter.print();
+        countersStack.peek().addCounter(counter);
  
         return data;  
     }
 
 
-// This Section is to handle the methods, There are four type of method need to be handle
-// void (return) method, constructor method, generic method and the normal method
+//This section is used to count the number of targeted statements
 
-    protected String statisticsString(){
-
-        String statisticsString = 
-            "#if:" + this.numberOfIf + 
-            ", #while:" + this.numberOfWhile + 
-            ", #break:" + this.numberOfBreak + 
-            ", #varLocal:" + this.numberOfVarLocal;
-
-        // return to 0
-        this.numberOfIf = 0;
-        this.numberOfWhile = 0;
-        this.numberOfBreak = 0;
-        this.numberOfVarLocal = 0;
-
-        return statisticsString;
-
-    }
-
-    protected String positionString(SimpleNode node, Object data){
-
-        String methodName = "MethodNoName";
-        int i;
-        for (i = 0; i < node.jjtGetNumChildren(); i++){
-            SimpleNode childNode = (SimpleNode)node.jjtGetChild(i);
-            if (childNode.toString() == "Identifier"){
-                methodName = childNode.jjtGetFirstToken().toString(); 
-                break;
-            }
-        }
-
-        String positionString = data.toString() + ", " + methodName + ", ";
-
-        return positionString;
-    }
-
-    protected void printStatistics(SimpleNode node, Object data){
-        System.out.println(this.positionString(node, data) + this.statisticsString());
-    }
-
-    public Object visit(GenericMethodOrConstructorRest node, Object data){
-
-        this.counting = true; //used for stop the MethoDeclaratorRest to count
+    public Object visit(IfStatement node, Object data){
+    
+        ((Stack<Counter>)data).peek().increaseNumberOfIfByOne();
 
         node.childrenAccept(this, data);
+ 
+        return data;  
+    }
 
-        this.printStatistics(node, data);
+    public Object visit(WhileStatement node, Object data){
+    
+        ((Stack<Counter>)data).peek().increaseNumberOfWhileByOne();
 
-        this.counting = false;
+        node.childrenAccept(this, data);
+ 
+        return data;  
+    }
 
-        return data; 
+    public Object visit(BreakStatement node, Object data){
+        
+        ((Stack<Counter>)data).peek().increaseNumberOfBreakByOne();
+
+        node.childrenAccept(this, data);
+ 
+        return data;  
+    }
+
+    public Object visit(LocalVariableDeclarationStatement node, Object data){
+ 
+        ((Stack<Counter>)data).peek().increaseNumberOfVarLocalByOne();
+
+        node.childrenAccept(this, data);
+ 
+        return data;  
+    }
+
+/*=========================Don't need to change after===========================================================*/
+
+    public Object visit(GenericMethodOrConstructorRest node, Object data){
+    
+        node.childrenAccept(this, data);
+ 
+        return data;  
     }
 
     public Object visit(ConstructorDecl node, Object data){
         
         node.childrenAccept(this, data);
-
-        this.printStatistics(node, data);
         
         return data;  
     }
@@ -114,8 +212,6 @@ public class TP1Visitor implements JavaParser1_7Visitor {
  
         node.childrenAccept(this, data);
     
-        this.printStatistics(node, data);
-
         return data;  
     }
 
@@ -123,57 +219,8 @@ public class TP1Visitor implements JavaParser1_7Visitor {
  
         node.childrenAccept(this, data);
         
-        if (!this.counting){
-
-            SimpleNode nodeWithName = 
-                (SimpleNode)node.jjtGetParent() // MethodOrFieldRest
-                                .jjtGetParent(); // MethodOrFieldDecl
-
-            this.printStatistics(nodeWithName, data);
-
-        }
         return data;  
     }
-
-//This section is used to count the number of targeted statements
-
-    public Object visit(IfStatement node, Object data){
- 
-        node.childrenAccept(this, data);
-
-        this.numberOfIf += 1;
- 
-        return data;  
-    }
-
-    public Object visit(WhileStatement node, Object data){
- 
-        node.childrenAccept(this, data);
-
-        this.numberOfWhile += 1;
- 
-        return data;  
-    }
-
-    public Object visit(BreakStatement node, Object data){
- 
-        node.childrenAccept(this, data);
-
-        this.numberOfBreak += 1;
- 
-        return data;  
-    }
-
-    public Object visit(LocalVariableDeclarationStatement node, Object data){
- 
-        node.childrenAccept(this, data);
-
-        this.numberOfVarLocal += 1;
- 
-        return data;  
-    }
-
-/*=========================Don't need to change after===========================================================*/
 
     public Object visit(SimpleNode node, Object data){
  
@@ -512,13 +559,6 @@ public class TP1Visitor implements JavaParser1_7Visitor {
     }
 
     public Object visit(FieldDeclaratorsRest node, Object data){
- 
-        node.childrenAccept(this, data);
- 
-        return data;  
-    }
-
-    public Object visit(MethodBody node, Object data){
  
         node.childrenAccept(this, data);
  

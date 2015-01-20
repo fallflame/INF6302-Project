@@ -1,3 +1,4 @@
+ASTStructureVisitor.java
 Annotation.java
 AnnotationElement.java
 AnnotationMethodOrConstantRest.java
@@ -152,6 +153,9 @@ SwitchLabel.java
 SwitchLabels.java
 SwitchStatement.java
 SynchronizedStatement.java
+TP1Visitor.java
+TestFile.java
+TestFile2.java
 ThrowStatement.java
 Token.java
 TokenMgrError.java
@@ -172,7 +176,6 @@ VariableDeclaratorRest.java
 VariableDeclarators.java
 VariableInitializer.java
 VariableModifier.java
-VisitorTP1.java
 VoidInterfaceMethodDeclaratorRest.java
 VoidMethodDecl.java
 VoidMethodDeclaratorRest.java
