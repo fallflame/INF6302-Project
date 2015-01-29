@@ -18,7 +18,7 @@ public class JavaParser1_7/*@bgen(jjtree)*/implements JavaParser1_7TreeConstants
             try
             {
                cnt++;
-               System.out.println("Parsing: " + s);
+              //System.out.println("Parsing: " + s);
 
               JavaParser1_7 parser = new JavaParser1_7(s);
               parser.CompilationUnit().jjtAccept(new TP1Visitor(), s); 
@@ -47,11 +47,11 @@ public class JavaParser1_7/*@bgen(jjtree)*/implements JavaParser1_7TreeConstants
     JavaParser1_7 parser;
         String fileName = new String();
     if (args.length == 0) {
-      System.out.println("Java Parser Version 0.1:  Reading from standard input . . .");
+      //System.out.println("Java Parser Version 0.1:  Reading from standard input . . .");
       parser = new JavaParser1_7(System.in);
             fileName = "_default_";
     } else if (args.length == 1) {
-      System.out.println("Java Parser Version 0.1:  Reading from file " + args[0] + " . . .");
+      //System.out.println("Java Parser Version 0.1:  Reading from file " + args[0] + " . . .");
             fileName = args[0];
       try {
         parser = new JavaParser1_7(new java.io.FileInputStream(args[0]));
@@ -70,7 +70,7 @@ public class JavaParser1_7/*@bgen(jjtree)*/implements JavaParser1_7TreeConstants
       // Yan: Add the .jjtAccept(new Visitor, fileName) to accept the visitor
       parser.CompilationUnit().jjtAccept(new TP1Visitor(), fileName); 
 
-      System.out.println("Java Parser Version 0.1:  Java program parsed successfully.");
+      //System.out.println("Java Parser Version 0.1:  Java program parsed successfully.");
     } catch (ParseException e) {
       System.out.println(e.getMessage());
       System.out.println("Java Parser Version 0.1:  Encountered errors during parse.");
@@ -90,7 +90,7 @@ public class JavaParser1_7/*@bgen(jjtree)*/implements JavaParser1_7TreeConstants
       {
          JavaParser1_7.m(args);
       }
-      System.out.println("Parsed " + cnt + " files in: " + (System.currentTimeMillis() - l));
+      //System.out.println("Parsed " + cnt + " files in: " + (System.currentTimeMillis() - l));
    }
 
   final public void Identifier() throws ParseException {

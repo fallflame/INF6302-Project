@@ -5,14 +5,18 @@
  * id, fileName, className, methodName, #if, #while, #break, #varLocal
  */
 import java.util.Stack;
-import java.io.PrintWriter;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-
 
 public class TP1Visitor implements JavaParser1_7Visitor {
 
+//Store the numbers in field, Don't consider the nested class
+/*    protected int numberOfId = 1;
+    protected int numberOfIf;
+    protected int numberOfWhile;
+    protected int numberOfBreak;
+    protected int numberOfVarLocal;
+*/      
     static int id; // count the line number of the output
+
 
 // A new class used only in this class, it used for count the info needed and print them.
     class Counter{
@@ -227,21 +231,21 @@ public class TP1Visitor implements JavaParser1_7Visitor {
 
     public Object visit(Identifier node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
   
         return data;    
     }
 
     public Object visit(QualifiedIdentifier node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
 
     public Object visit(QualifiedIdentifierList node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
@@ -255,14 +259,14 @@ public class TP1Visitor implements JavaParser1_7Visitor {
 
     public Object visit(Ellipsis node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
 
     public Object visit(HasEllipsis node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
@@ -276,7 +280,7 @@ public class TP1Visitor implements JavaParser1_7Visitor {
 
     public Object visit(PossibleStaticModifier node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
@@ -332,7 +336,7 @@ public class TP1Visitor implements JavaParser1_7Visitor {
 
     public Object visit(InterfaceDeclaration node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
@@ -360,7 +364,7 @@ public class TP1Visitor implements JavaParser1_7Visitor {
 
     public Object visit(Type node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
@@ -710,7 +714,7 @@ public class TP1Visitor implements JavaParser1_7Visitor {
 
     public Object visit(VariableDeclarators node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
